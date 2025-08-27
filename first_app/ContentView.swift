@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import CoreLocation
 
 struct ContentView: View {
     @State private var selectedTab = 0
@@ -25,110 +26,25 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            // 地図表示エリア（MapKit使用）
-            Map(coordinateRegion: $region, annotationItems: shops) { shop in
-                MapAnnotation(coordinate: shop.coordinate) {
-                    VStack(spacing: 4) {
-                        // 青いピン
-                        ZStack {
-                            Circle()
-                                .fill(Color.blue.opacity(0.3))
-                                .frame(width: 60, height: 60)
-                            
-                            Circle()
-                                .fill(Color.blue)
-                                .frame(width: 20, height: 20)
-                                .overlay(
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 8, height: 8)
-                                )
-                        }
-                        
-                        // ショップアイコン
-                        Image(systemName: "tshirt")
-                            .font(.system(size: 20))
-                            .foregroundColor(.cyan)
-                            .padding(.top, -10)
-                        
-                        // ショップ名
-                        Text(shop.name)
-                            .font(.system(size: 12))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.white)
-                            .cornerRadius(8)
-                            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                    }
-                }
-            }
-            .ignoresSafeArea(.all, edges: .bottom)
+            // 背景色
+            Color.white.ignoresSafeArea()
             
-            VStack {
-                // 検索バー（地図の上に配置）
-                HStack {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.black)
-                            .font(.system(size: 16))
-                        
-                        TextField("ショップ名を検索", text: $searchText)
-                            .font(.system(size: 16))
-                            .foregroundColor(.black)
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(25)
-                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
-                
-                Spacer()
+            // タブに応じた画面表示
+            if selectedTab == 0 {
+                // ホーム画面（地図 + 検索バー）
+                HomeView(searchText: $searchText, region: $region, shops: shops)
+            } else if selectedTab == 1 {
+                // お気に入り画面
+                FavoritesView()
+            } else if selectedTab == 2 {
+                // お知らせ画面
+                NotificationsView()
+            } else if selectedTab == 3 {
+                // 設定画面
+                SettingsView()
             }
             
-            // 地図上の操作ボタン
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    VStack(spacing: 12) {
-                        // 現在地ボタン
-                        Button(action: {
-                            // 現在地に戻る処理
-                        }) {
-                            Image(systemName: "location.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                                .frame(width: 44, height: 44)
-                                .background(Color.blue)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
-                        }
-                        
-                        // 地図タイプ切り替えボタン
-                        Button(action: {
-                            // 地図タイプ切り替え処理
-                        }) {
-                            Image(systemName: "map")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                                .frame(width: 44, height: 44)
-                                .background(Color.green)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
-                        }
-                    }
-                    .padding(.trailing, 16)
-                    .padding(.bottom, 100)
-                }
-            }
-            
-            // フッター
+            // フッター（常に表示）
             VStack {
                 Spacer()
                 HStack(spacing: 0) {
@@ -198,25 +114,13 @@ struct ContentView: View {
                 }
                 .padding(.vertical, 12)
                 .background(Color.white)
-                .overlay(
-                    Rectangle()
-                        .frame(height: 0.5)
-                        .foregroundColor(Color(.systemGray4)),
-                    alignment: .top
-                )
             }
         }
         .background(Color.white)
+        #if os(iOS)
         .navigationBarHidden(true)
+        #endif
     }
-}
-
-// ショップデータモデル
-struct Shop: Identifiable {
-    let id = UUID()
-    let name: String
-    let coordinate: CLLocationCoordinate2D
-    let category: String
 }
 
 #Preview {
